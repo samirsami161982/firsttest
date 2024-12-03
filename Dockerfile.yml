@@ -1,0 +1,25 @@
+FROM php:8.2-fpm
+
+# Installer les dépendances système
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    libzip-dev \
+    unzip \
+    git \
+    curl
+
+# Installer les extensions PHP nécessaires
+RUN docker-php-ext-install pdo pdo_mysql zip
+
+# Installer Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Installer Node.js et npm
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+
+# Définir le répertoire de travail
+WORKDIR /var/www/html
+
+
+

@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.yml
+    container_name: laravel_app
+    restart: always
+    working_dir: /var/www/html
+    volumes:
+      - ./laravel:/var/www/html:delegated
+      - ./laravel/storage:/var/www/html/storage:delegated
+    ports:
+      - "9000:9000"
+    depends_on:
+      - mysql
+    environment:
+      - COMPOSER_MEMORY_LIMIT=-1
+
+  mysql:
+    image: mysql:8.0
+    container_name: laravel_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: laravel_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: 1234
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: 1234
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+
+  nginx:
+    image: nginx:latest
+    container_name: laravel_nginx
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - ./laravel:/var/www/html
+      - ./nginx:/etc/nginx/conf.d
+    depends_on:
+      - app
+volumes:
+  mysql_data:
